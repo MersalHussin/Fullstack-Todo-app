@@ -2,6 +2,7 @@ import { useForm, SubmitHandler } from "react-hook-form"
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
 import { Link } from "react-router-dom";
+import InputErrorMessage from "../components/InputErrorMessage";
 
 
 interface IFormInput {
@@ -18,6 +19,8 @@ const  RegisterPage=()=>{
 
   console.log(errors);
 
+
+
   return (
     <div className="max-w-md mx-auto">
       
@@ -26,10 +29,15 @@ const  RegisterPage=()=>{
       </h2>
       
       <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-        <Input placeholder="Username" {...register("username" , {required: "Username is required"})}/>
-        <p>{errors?.username?.message}</p>
-        <Input placeholder="Emaill address" {...register("email" , {required: "Email is required"})} />
-        <Input placeholder="Password" {...register("password" , {required: "Password is required"})} />
+        <Input placeholder="Username" {...register("username" , {required: true, minLength:5})}/>
+          {errors.username && errors.username.type === "required" && <InputErrorMessage msg="User name is Requird"/>}
+          {errors.username && errors.username.type === "minLength" && <InputErrorMessage msg="User Should at least 5 charcters"/>}
+        <Input placeholder="Emaill address" {...register("email" , {required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,})} />
+          {errors.email && errors.email.type === "required" && <InputErrorMessage msg="Email is Requird"/>}
+          {errors.email && errors.email.type === "pattern" && <InputErrorMessage msg="Not Valid Email"/>}
+        <Input placeholder="Password" {...register("password" , {required: true , minLength:6})} />
+          {errors.password && errors.password.type === "required" && <InputErrorMessage msg="Password is Requird"/>}
+          {errors.password && errors.password.type === "minLength" && <InputErrorMessage msg="Password Should at least 6 charcters"/>}
 
        <Button fullWidth>Register</Button>
                   <p className="text-center text-sm text-gray-500 space-x-2">
