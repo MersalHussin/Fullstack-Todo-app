@@ -4,6 +4,9 @@ import Input from "../components/ui/Input";
 import { Link } from "react-router-dom";
 import InputErrorMessage from "../components/InputErrorMessage";
 import { REGISTER_FORM } from "../data";
+import { yupResolver } from "@hookform/resolvers/yup"
+import { registerSchema } from "../validation";
+
 
 
 // ** Handelrs
@@ -22,7 +25,9 @@ interface IFormInput {
 
 
 const  RegisterPage=()=>{
-  const { register, handleSubmit , formState:{errors} } = useForm<IFormInput>()
+  const { register, handleSubmit , formState:{errors} } = useForm<IFormInput>({
+    resolver: yupResolver(registerSchema)
+  })
   const onSubmit: SubmitHandler<IFormInput> = (data) => console.log("DATA",data)
   
   console.log(errors);
@@ -32,10 +37,7 @@ const  RegisterPage=()=>{
     return(
       <div key={idx}>
       <Input type={type} placeholder={placeholder} {...register(name , validation)}/>
-       {errors[name] && errors[name].type === "required" && <InputErrorMessage msg={`${name} is requird`}/>}
-        {errors[name] && errors[name].type === "minLength" && <InputErrorMessage msg={`${name} Should at least 6 charcters`}/>}
-        {errors[name] && errors[name].type === "pattern" && <InputErrorMessage msg="Email not Valid"/>}
-
+       {errors[name] && <InputErrorMessage msg={errors[name]?.message}/>}
       </div>
     )
   }) 
