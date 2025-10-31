@@ -29,3 +29,24 @@ export const REGISTER_FORM : IRegisterInput[] = [
         }
     }
 ]
+
+export const LOGIN_FORM : IRegisterInput[] = [
+    {
+        name: "email",
+        placeholder: "Enter your email",
+        type: "email",
+        validation:{
+            required: true,
+            pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        },
+    },
+    {
+        name: "password",
+        placeholder: "Enter your password",
+        type: "password",
+        validation:{
+            required: true,
+            minLength: 6,
+        }
+    }
+]

@@ -6,15 +6,34 @@ import InputErrorMessage from "../components/InputErrorMessage";
 import { REGISTER_FORM } from "../data";
 import { yupResolver } from "@hookform/resolvers/yup"
 import { registerSchema } from "../validation";
+import axiosinstance from "../config/axios config";
+import toast from "react-hot-toast";
+import { useState } from "react";
 
 
 
-// ** Handelrs
 interface IFormInput {
   username: string;
   email: string;
   password: string;
 }
+
+
+
+
+const  RegisterPage=()=>{
+  const [isLoading, setIsLoading] = useState(false);
+  const { register, handleSubmit , formState:{errors} } = useForm<IFormInput>({
+    resolver: yupResolver(registerSchema)
+  })
+
+  // ** Handelrs
+
+  const onSubmit: SubmitHandler<IFormInput> = async(data) => {
+    console.log("DATA",data)
+    setIsLoading(true);
+    console.log(errors);
+    
 
 /*
 مراحل الـ Requist
@@ -24,13 +43,35 @@ interface IFormInput {
 */
 
 
-const  RegisterPage=()=>{
-  const { register, handleSubmit , formState:{errors} } = useForm<IFormInput>({
-    resolver: yupResolver(registerSchema)
-  })
-  const onSubmit: SubmitHandler<IFormInput> = (data) => console.log("DATA",data)
-  
-  console.log(errors);
+try {
+  // 2- fulfilled => Success (Optional)
+  const {status} = await axiosinstance.post("/auth/local/register", data)
+  console.log(status);
+  if(status === 200){
+    toast.success("Register Successfull"),{
+      duration: 4000,
+      position: "top-center",
+      style: {
+        border: "1px solid #4ade80",
+        padding: "16px",
+        color: "#4ade80",
+      },
+      iconTheme: {
+        primary: "#4ade80",
+        secondary: "#ffffff",
+    }}
+  }
+} catch (error) {
+  // 3- rejected => Faield (Optional)
+    console.log(error);
+  }
+  finally{
+    setIsLoading(false);
+  }
+}
+
+
+
 
   // Renders
   const renderRegisterForm = REGISTER_FORM.map(({name,placeholder,type,validation},idx) =>{
@@ -54,7 +95,10 @@ return (
       {renderRegisterForm}
 
 
-       <Button fullWidth>Register</Button>
+       <Button fullWidth isLoading={isLoading} >Register
+
+
+       </Button>
                   <p className="text-center text-sm text-gray-500 space-x-2">
           <span>have an account?</span>
           <Link to={"/login"} className="underline text-indigo-600 font-semibold">

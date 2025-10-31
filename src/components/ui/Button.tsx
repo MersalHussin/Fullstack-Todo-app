@@ -54,14 +54,17 @@ const Button = ({
 }: ButtonProps) => {
   return (
     <button
+    
       type={type}
       className={cn(buttonVariants({ variant, size, fullWidth, className }))}
       {...props}
       disabled={isLoading}
     >
+      {children}
+
       {isLoading ? (
         <svg
-          className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+          className="animate-spin mx-3 h-5 w-5 text-white"
           xmlns="http://www.w3.org/2000/svg"
           fill="none"
           viewBox="0 0 24 24"
@@ -81,7 +84,6 @@ const Button = ({
           ></path>
         </svg>
       ) : null}
-      {children}
     </button>
   );
 };
