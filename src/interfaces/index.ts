@@ -10,3 +10,14 @@ export interface IRegisterInput {
         pattern?: RegExp;
     }
 }
+
+export interface IErrorMessage {
+    error:{
+        // deatils?:{
+        //     errors:{
+        //         message:string
+        //     }[];
+        // }
+        message?:string;
+    }
+}

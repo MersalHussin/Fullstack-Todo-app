@@ -9,6 +9,8 @@ import { registerSchema } from "../validation";
 import axiosinstance from "../config/axios config";
 import toast from "react-hot-toast";
 import { useState } from "react";
+import { AxiosError } from "axios";
+import { IErrorMessage } from "../interfaces";
 
 
 
@@ -63,6 +65,19 @@ try {
   }
 } catch (error) {
   // 3- rejected => Faield (Optional)
+  const errorObj = error as AxiosError<IErrorMessage>
+  toast.error(`${errorObj.response?.data.error.message}`,{
+    duration: 4000,
+    position: "top-center",
+    style: {
+      border: "1px solid #ef4444",
+      padding: "16px",
+      color: "#ef4444",
+    },
+    iconTheme: {
+      primary: "#ef4444",
+      secondary: "#ffffff",
+  }})
     console.log(error);
   }
   finally{
