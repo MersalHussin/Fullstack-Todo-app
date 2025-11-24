@@ -1,4 +1,4 @@
-import { IRegisterInput } from "../interfaces";
+import { ILoginInput, IRegisterInput } from "../interfaces";
 
 export const REGISTER_FORM : IRegisterInput[] = [
 {
@@ -30,9 +30,9 @@ export const REGISTER_FORM : IRegisterInput[] = [
     }
 ]
 
-export const LOGIN_FORM : IRegisterInput[] = [
+export const LOGIN_FORM : ILoginInput[] = [
     {
-        name: "email",
+        name: "identifier",
         placeholder: "Enter your email",
         type: "email",
         validation:{
