@@ -25,7 +25,7 @@ const Navbar = () => {
             <li className="duration-200 text-md text-gray-700 font-semibold">
               <NavLink to="/todos">Todos</NavLink>
             </li>
-            <p>{userData?.user?.email}</p>
+            <NavLink to="/profile">Profile</NavLink>
             <Button className="cursor-pointer" size={"sm"} onClick={onLogout}>
               Logout
             </Button>
