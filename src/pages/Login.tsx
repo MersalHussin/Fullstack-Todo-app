@@ -10,6 +10,7 @@ import toast from "react-hot-toast";
 import { IErrorMessage } from "../interfaces";
 import { AxiosError } from "axios";
 import { useState } from "react";
+// import { useNavigate } from "react-router-dom";
 
 interface IFormInput {
   identifier: string;
@@ -19,6 +20,7 @@ interface IFormInput {
 
 
 const LoginPage=()=>{
+  // const navigate = useNavigate()
   const [isLoading, setIsLoading] = useState(false);
   const { register, handleSubmit, formState: { errors } } = useForm<IFormInput>({
     resolver: yupResolver(loginSchema)
@@ -33,11 +35,11 @@ const LoginPage=()=>{
   
 try {
   // 2- fulfilled => Success (Optional)
-  const {status} = await axiosinstance.post("/auth/local", data)
-  console.log(status);
+  const {status, data:resData} = await axiosinstance.post("/auth/local", data);
+  console.log(resData);
   if(status === 200){
-    toast.success("Login Successfull"),{
-      duration: 4000,
+    toast.success("Login Successfull, You will navigate to the home page after 2 seconds"),{
+      duration: 1500,
       position: "top-center",
       style: {
         border: "1px solid #4ade80",
@@ -48,6 +50,11 @@ try {
         primary: "#4ade80",
         secondary: "#ffffff",
     }}
+    localStorage.setItem("loggedinUser", JSON.stringify(resData))
+
+    setTimeout(() => {
+      location.replace("/")
+    },2000)
   }
 } catch (error) {
   // 3- rejected => Faield (Optional)

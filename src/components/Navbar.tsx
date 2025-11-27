@@ -3,9 +3,10 @@ import Button from "../components/ui/Button";
 
 const Navbar = () => {
   const { pathname } = useLocation();
-  const storageKey = "loggedInUser";
+  const storageKey = "loggedinUser";
   const userDataString = localStorage.getItem(storageKey);
   const userData = userDataString ? JSON.parse(userDataString) : null;
+  console.log(userData);
   const onLogout = () => {
     localStorage.removeItem(storageKey);
     setTimeout(() => {
@@ -24,6 +25,7 @@ const Navbar = () => {
             <li className="duration-200 text-md text-gray-700 font-semibold">
               <NavLink to="/todos">Todos</NavLink>
             </li>
+            <p>{userData?.user?.email}</p>
             <Button className="cursor-pointer" size={"sm"} onClick={onLogout}>
               Logout
             </Button>

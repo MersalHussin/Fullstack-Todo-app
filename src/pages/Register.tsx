@@ -1,7 +1,7 @@
 import { useForm, SubmitHandler } from "react-hook-form"
 import Button from "../components/ui/Button";
 import Input from "../components/ui/Input";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import InputErrorMessage from "../components/InputErrorMessage";
 import { REGISTER_FORM } from "../data";
 import { yupResolver } from "@hookform/resolvers/yup"
@@ -24,6 +24,7 @@ interface IFormInput {
 
 
 const  RegisterPage=()=>{
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
   const { register, handleSubmit , formState:{errors} } = useForm<IFormInput>({
     resolver: yupResolver(registerSchema)
@@ -50,8 +51,8 @@ try {
   const {status} = await axiosinstance.post("/auth/local/register", data)
   console.log(status);
   if(status === 200){
-    toast.success("Register Successfull"),{
-      duration: 4000,
+    toast.success("Register Successfull you will navigate to the login page after 2s"),{
+      duration: 1500,
       position: "top-center",
       style: {
         border: "1px solid #4ade80",
@@ -62,6 +63,9 @@ try {
         primary: "#4ade80",
         secondary: "#ffffff",
     }}
+    setTimeout(()=>{
+      navigate('/.')
+    },2000)
   }
 } catch (error) {
   // 3- rejected => Faield (Optional)
