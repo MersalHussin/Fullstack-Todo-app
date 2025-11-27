@@ -1,45 +1,40 @@
-import { useEffect, useState } from "react"
+import axiosinstance from "../config/axios config";
 import Button from "./ui/Button"
-import axiosinstance from "../config/axios config"
-
+import { useQuery } from '@tanstack/react-query'
 
 const TodoList = () => {
-const [todos, setTodos] = useState([]);
-const [isLoading, setIsLoading] = useState(true); 
 const storageKey = "loggedinUser";
 const userDataString =  localStorage.getItem(storageKey);
 const userData = userDataString ? JSON.parse(userDataString) : null;
-
-useEffect(() =>{
-  try{
-    axiosinstance.get("/users/me?populate=todoayas", {
+const {isLoading, data,error} = useQuery({
+  queryKey: ['todo'],
+  queryFn:async() =>{
+    const {data}= await axiosinstance.get("/users/me?populate=todoayas",{
       headers: {
-        Authorization: `Bearer ${userData?.jwt}`,
+        Authorization: `Bearer ${userData.jwt}`
       }
-    })
-    .then((res => setTodos(res.data.todoayas)))
-    .catch(err => console.log("This is error", err))
-    .finally(() => setIsLoading(false));
-  }catch(error){
-    console.log(error);
+    }
+  )
+  return data;
   }
-},[userData?.jwt])
+})
 
-if(isLoading){
-  return <p>Loading...</p>
-}
+console.log(isLoading,data,error);
 
-  return (
+if(isLoading) return <p>Loading....</p>
+if(error) return "An error has occurred" + error.message
+return (
     <>
     <div className="flex flex-col w-full flex-wrap items-center justify-between">
-      {todos.length ? todos.map(todo => (
+     
+     {data.todoayas.map(todo =>(
 
-      <div key={todo.id} className="flex items-center justify-between w-full mb-4 p-4 border rounded-md">
+       <div key={todo.id}  className="flex items-center justify-between w-full mb-4 p-4 border rounded-md">
         <p className="w-full font-semibold"> 1- {todo.title}</p>
         <Button size={"sm"}>Edit</Button>
         <Button variant={"danger"} size={"sm"}>Remove</Button>
     </div>
-      )) : (<p>No todos found.</p>)}
+      ))}
       </div>
  
        
