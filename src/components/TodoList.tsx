@@ -4,9 +4,11 @@ import Button from "./ui/Button"
 import Input from "./ui/Input";
 import Modal from "./ui/Modal";
 import Textarea from "./ui/Textarea";
+import axiosinstance from "../config/axios config";
 
 interface ITodo {
   id: number;
+  documentId: string;
   title: string;
   description: string;
 }
@@ -16,6 +18,7 @@ const TodoList = () => {
 const [isEditModalOpen , setIsEditModalOpen] = useState(false)
 const [todoToEdit, setTodoToEdit] = useState<ITodo>({
   description: "",
+    documentId: "",
   id: 0,
   title: ""
 });
@@ -42,15 +45,27 @@ const  onChangeHandler = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
     [name]: value
   })
 }
-const  onSubmitHandler = (e : FormEvent<HTMLFormElement>) =>{
+const  onSubmitHandler = async (e : FormEvent<HTMLFormElement>) =>{
     e.preventDefault();
-    console.log(todoToEdit);
+    const{title, description} = todoToEdit;
+    console.log(todoToEdit.documentId);
+    try {
+      const res = await axiosinstance.put(`/todoayas/${todoToEdit.documentId}`, {data: {title , description}},{
+        headers: {
+          Authorization: `Bearer ${userData.jwt}`
+        }
+      })
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
 }
 
 const onCloseEditModal = () =>{
   setIsEditModalOpen(false);
   setTodoToEdit({
     id: 0,
+    documentId: "",
     title: "",
     description: "",
  })}
