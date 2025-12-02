@@ -1,23 +1,30 @@
-import { useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import UseAuthenticatedQuery from "../hooks/useAuthenticatedQuery";
 import Button from "./ui/Button"
 import Input from "./ui/Input";
 import Modal from "./ui/Modal";
+import Textarea from "./ui/Textarea";
 
 interface ITodo {
   id: number;
   title: string;
+  description: string;
 }
 
 const TodoList = () => {
 
 const [isEditModalOpen , setIsEditModalOpen] = useState(false)
+const [todoToEdit, setTodoToEdit] = useState<ITodo>({
+  description: "",
+  id: 0,
+  title: ""
+});
 const storageKey = "loggedinUser";
 const userDataString =  localStorage.getItem(storageKey);
 const userData = userDataString ? JSON.parse(userDataString) : null;
 const {isLoading, data} = UseAuthenticatedQuery({
   url:"/users/me?populate=todoayas",
-  querykey:['todos'],
+  querykey:['todoayas'],
   config: {
     headers: {
       Authorization: `Bearer ${userData.jwt}`
@@ -28,30 +35,56 @@ const {isLoading, data} = UseAuthenticatedQuery({
 
 
 // Handelers
-const onToggleEditModal = () =>{
-  setIsEditModalOpen(prev => !prev)
+const  onChangeHandler = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const {value, name} = e.target;
+  setTodoToEdit({
+    ...todoToEdit,
+    [name]: value
+  })
+}
+const  onSubmitHandler = (e : FormEvent<HTMLFormElement>) =>{
+    e.preventDefault();
+    console.log(todoToEdit);
+}
+
+const onCloseEditModal = () =>{
+  setIsEditModalOpen(false);
+  setTodoToEdit({
+    id: 0,
+    title: "",
+    description: "",
+ })}
+const onOpenEditModal = (todo:ITodo) => {
+  setTodoToEdit(todo)
+  setIsEditModalOpen(true);
 }
 
 if(isLoading) return <p>Loading....</p>
+
 return (
     <>
     <div className="flex flex-col w-full flex-wrap items-center justify-between">
-     
      {data.todoayas.length ? data.todoayas.map((todo: ITodo) =>(
 
        <div key={todo.id}  className="flex items-center justify-between w-full mb-4 p-4 border rounded-md">
-        <p className="w-full font-semibold"> 1- {todo.title}</p>
-        <Button onClick={onToggleEditModal} size={"sm"}>Edit</Button>
+        <div className="w-full">
+          <p className="font-semibold">{todo.title}</p>
+          <p className="text-sm text-gray-600">{todo.description}</p>
+        </div>
+        <Button onClick={() => onOpenEditModal(todo)} size={"sm"}>Edit</Button>
         <Button variant={"danger"} size={"sm"}>Remove</Button>
     </div>
       )): <p>No Todos yet</p>}
 
-      <Modal isOpen={isEditModalOpen} closeModal={onToggleEditModal} title="Edit this Tood"  >
-        <Input value="Edit Todo"/>
+      <Modal isOpen={isEditModalOpen} closeModal={onCloseEditModal} title="Edit this Tood"  >
+      <form onSubmit={onSubmitHandler} className="space-y-4">
+        <Input value={todoToEdit.title} onChange={onChangeHandler} name="title"/>
+        <Textarea  value={todoToEdit.description} onChange={onChangeHandler} name="description" placeholder="Edit Description" className="mt-4 w-full"/>
         <div className="flex gap-2 mt-4">
-        <Button onClick={onToggleEditModal} size={"sm"}>Cancel</Button>
-        <Button variant={"cancel"} size={"sm"}>Apply</Button>
+        <Button onClick={onCloseEditModal} size={"sm"}>Cancel</Button>
+        <Button variant={"cancel"} size={"sm"} >Apply</Button>
         </div>
+      </form>
       </Modal>
       </div>
  
