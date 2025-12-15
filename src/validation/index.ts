@@ -14,3 +14,9 @@ export const loginSchema = yup
     password: yup.string().required("Password is Requird").min(6, "Password should be at least 6 characters"),
   })
   .required()
+export const editModelSchema = yup
+.object({
+    title: yup.string().required("You didn't edit Title"),
+    description: yup.string(),
+  })
+  .required()

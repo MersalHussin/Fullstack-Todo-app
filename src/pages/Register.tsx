@@ -97,7 +97,7 @@ try {
     return(
       <div key={idx}>
       <Input type={type} placeholder={placeholder} {...register(name , validation)}/>
-       {errors[name] && <InputErrorMessage msg={errors[name]?.message}/>}
+      {errors[name] && <InputErrorMessage msg={errors[name]?.message}/>}
       </div>
     )
   }) 

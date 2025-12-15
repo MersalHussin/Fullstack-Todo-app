@@ -1,10 +1,14 @@
-import { ChangeEvent, FormEvent, useState } from "react";
+import { useState } from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 import UseAuthenticatedQuery from "../hooks/useAuthenticatedQuery";
 import Button from "./ui/Button"
 import Input from "./ui/Input";
 import Modal from "./ui/Modal";
 import Textarea from "./ui/Textarea";
 import axiosinstance from "../config/axios config";
+import { editModelSchema } from "../validation";
+import InputErrorMessage from "./InputErrorMessage";
 
 interface ITodo {
   id: number;
@@ -13,15 +17,19 @@ interface ITodo {
   description: string;
 }
 
+interface IEditFormInput {
+  title: string;
+  description?: string;
+}
+
 const TodoList = () => {
+  const { register, handleSubmit, formState: { errors }, reset } = useForm<IEditFormInput>({
+    resolver: yupResolver(editModelSchema),
+    mode: "onSubmit"
+  });
 
 const [isEditModalOpen , setIsEditModalOpen] = useState(false)
-const [todoToEdit, setTodoToEdit] = useState<ITodo>({
-  description: "",
-    documentId: "",
-  id: 0,
-  title: ""
-});
+const [todoToEdit, setTodoToEdit] = useState<ITodo>();
 const storageKey = "loggedinUser";
 const userDataString =  localStorage.getItem(storageKey);
 const userData = userDataString ? JSON.parse(userDataString) : null;
@@ -38,24 +46,16 @@ const {isLoading, data} = UseAuthenticatedQuery({
 
 
 // Handelers
-const  onChangeHandler = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-  const {value, name} = e.target;
-  setTodoToEdit({
-    ...todoToEdit,
-    [name]: value
-  })
-}
-const  onSubmitHandler = async (e : FormEvent<HTMLFormElement>) =>{
-    e.preventDefault();
-    const{title, description} = todoToEdit;
-    console.log(todoToEdit.documentId);
+const  onSubmitHandler: SubmitHandler<IEditFormInput> = async (data) =>{
+    const{title, description} = data;
     try {
-      const res = await axiosinstance.put(`/todoayas/${todoToEdit.documentId}`, {data: {title , description}},{
+      const res = await axiosinstance.put(`/todoayas/${todoToEdit?.documentId}`, {data: {title , description}},{
         headers: {
           Authorization: `Bearer ${userData.jwt}`
         }
       })
       console.log(res);
+      onCloseEditModal();
     } catch (error) {
       console.log(error);
     }
@@ -63,15 +63,13 @@ const  onSubmitHandler = async (e : FormEvent<HTMLFormElement>) =>{
 
 const onCloseEditModal = () =>{
   setIsEditModalOpen(false);
-  setTodoToEdit({
-    id: 0,
-    documentId: "",
-    title: "",
-    description: "",
- })}
+  reset();
+}
+
 const onOpenEditModal = (todo:ITodo) => {
-  setTodoToEdit(todo)
+  setTodoToEdit(todo);
   setIsEditModalOpen(true);
+  reset({ title: todo.title, description: todo.description });
 }
 
 if(isLoading) return <p>Loading....</p>
@@ -91,13 +89,19 @@ return (
     </div>
       )): <p>No Todos yet</p>}
 
-      <Modal isOpen={isEditModalOpen} closeModal={onCloseEditModal} title="Edit this Tood"  >
-      <form onSubmit={onSubmitHandler} className="space-y-4">
-        <Input value={todoToEdit.title} onChange={onChangeHandler} name="title"/>
-        <Textarea  value={todoToEdit.description} onChange={onChangeHandler} name="description" placeholder="Edit Description" className="mt-4 w-full"/>
+      <Modal isOpen={isEditModalOpen} closeModal={onCloseEditModal} title="Edit this Todo"  >
+      <form onSubmit={handleSubmit(onSubmitHandler)} className="space-y-4">
+        <div>
+          <Input {...register("title")} placeholder="Title" />
+          {errors.title && <InputErrorMessage msg={errors.title.message} />}
+        </div>
+        <div>
+          <Textarea {...register("description")} placeholder="Description" className="w-full"/>
+          {errors.description && <InputErrorMessage msg={errors.description.message} />}
+        </div>
         <div className="flex gap-2 mt-4">
-        <Button onClick={onCloseEditModal} size={"sm"}>Cancel</Button>
-        <Button variant={"cancel"} size={"sm"} >Apply</Button>
+          <Button type="button" onClick={onCloseEditModal} size={"sm"}>Cancel</Button>
+          <Button type="submit" variant={"cancel"} size={"sm"}>Apply</Button>
         </div>
       </form>
       </Modal>
