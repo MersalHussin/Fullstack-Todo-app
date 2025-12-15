@@ -31,6 +31,7 @@ const TodoList = () => {
   });
 
 const [isUpdating , setIsUpdating] = useState(false)
+const [isRemoveOpen , setIsRemoveOpen] = useState(false)
 const [isEditModalOpen , setIsEditModalOpen] = useState(false)
 const [todoToEdit, setTodoToEdit] = useState<ITodo>();
 const storageKey = "loggedinUser";
@@ -68,6 +69,7 @@ const  onSubmitHandler: SubmitHandler<IEditFormInput> = async (data) =>{
     }
 }
 
+
 const onCloseEditModal = () =>{
   setIsEditModalOpen(false);
   reset();
@@ -79,6 +81,26 @@ const onOpenEditModal = (todo:ITodo) => {
   reset({ title: todo.title, description: todo.description });
 }
 
+  const removeHandler = () =>{
+    try {
+      const res = axiosinstance.delete(`/todoayas/${todoToEdit?.documentId}`,{
+        headers:{
+          Authorization: `Bearer ${userData.jwt}`
+        }
+      })
+      console.log(res);
+      closeRemoveModal()
+    } catch (error) {
+      console.log(error);
+    }
+  }
+  
+  const openRemoveModal = () => {
+    setIsRemoveOpen(true)
+  }
+  function closeRemoveModal() {
+    setIsRemoveOpen(false)
+  }
 if(isLoading) return <p>Loading....</p>
 
 return (
@@ -92,7 +114,7 @@ return (
           <p className="text-sm text-gray-600">{todo.description}</p>
         </div>
         <Button onClick={() => onOpenEditModal(todo)} size={"sm"}>Edit</Button>
-        <Button variant={"danger"} size={"sm"}>Remove</Button>
+        <Button onClick={()=> openRemoveModal()} variant={"danger"} size={"sm"}>Remove</Button>
     </div>
       )): <p>No Todos yet</p>}
 
@@ -113,6 +135,20 @@ return (
       </form>
       </Modal>
       </div>
+
+
+      {/* Delete Modal */}
+        <Modal
+        isOpen={isRemoveOpen}
+        closeModal={onCloseEditModal}
+        title="Are you Sure to remove this modal"
+      >
+          <p className="text-gray-500 text-md font-medium">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Veritatis  eum unde corporis odit voluptatem repellendus minus incidunt laudantium! Quaerat.</p>
+<div className="flex gap-3 pt-1  ">
+            <Button className="flex-1 bg-red-600 " style={{background:"red"}} onClick={removeHandler}>Yes, Remove</Button>
+          <Button type="button" onClick={closeRemoveModal} className="flex-1 bg-gray-100 hover:bg-gray-200" style={{color:"black", backgroundColor:"gray"}}>Cancel</Button>
+</div>
+      </Modal>
  
        
     </>
