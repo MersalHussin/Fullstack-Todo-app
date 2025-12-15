@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useQueryClient } from "@tanstack/react-query";
 import UseAuthenticatedQuery from "../hooks/useAuthenticatedQuery";
 import Button from "./ui/Button"
 import Input from "./ui/Input";
@@ -23,11 +24,13 @@ interface IEditFormInput {
 }
 
 const TodoList = () => {
+  const queryClient = useQueryClient();
   const { register, handleSubmit, formState: { errors }, reset } = useForm<IEditFormInput>({
     resolver: yupResolver(editModelSchema),
     mode: "onSubmit"
   });
 
+const [isUpdating , setIsUpdating] = useState(false)
 const [isEditModalOpen , setIsEditModalOpen] = useState(false)
 const [todoToEdit, setTodoToEdit] = useState<ITodo>();
 const storageKey = "loggedinUser";
@@ -47,6 +50,7 @@ const {isLoading, data} = UseAuthenticatedQuery({
 
 // Handelers
 const  onSubmitHandler: SubmitHandler<IEditFormInput> = async (data) =>{
+  setIsUpdating(true)
     const{title, description} = data;
     try {
       const res = await axiosinstance.put(`/todoayas/${todoToEdit?.documentId}`, {data: {title , description}},{
@@ -55,9 +59,12 @@ const  onSubmitHandler: SubmitHandler<IEditFormInput> = async (data) =>{
         }
       })
       console.log(res);
+      queryClient.invalidateQueries({ queryKey: ['todoayas'] });
       onCloseEditModal();
     } catch (error) {
       console.log(error);
+    } finally{
+      setIsUpdating(false)
     }
 }
 
@@ -100,8 +107,8 @@ return (
           {errors.description && <InputErrorMessage msg={errors.description.message} />}
         </div>
         <div className="flex gap-2 mt-4">
-          <Button type="button" onClick={onCloseEditModal} size={"sm"}>Cancel</Button>
-          <Button type="submit" variant={"cancel"} size={"sm"}>Apply</Button>
+          <Button type="button" variant={"cancel"} onClick={onCloseEditModal} size={"sm"}>Cancel</Button>
+          <Button type="submit"  size={"sm"} isLoading={isUpdating}>Apply</Button>
         </div>
       </form>
       </Modal>
