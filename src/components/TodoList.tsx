@@ -11,6 +11,8 @@ import axiosinstance from "../config/axios config";
 import { editModelSchema } from "../validation";
 import InputErrorMessage from "./InputErrorMessage";
 import TodoSkeleton from "./TodoSkeleton";
+import { faker } from '@faker-js/faker';
+
 
 interface ITodo {
   id?: number;
@@ -153,11 +155,31 @@ if(isLoading) return(
   </div>
 )
 
+const generateTodos = async () => {
+  for (let i = 0; i < 100; i++) {
+    try {
+      const {data} = await axiosinstance.post(`/todoayas`, {data: {title:faker.word.words(5) , description:faker.lorem.paragraph(2) ,user:[userData.user.id]}},{
+        headers: {
+          Authorization: `Bearer ${userData.jwt}`
+        }
+      })
+      
+      console.log(data);
+    } catch (error) {
+      console.log(error);
+    } finally{
+      setIsUpdating(false)
+    }
+}
+    
+  }
+
 return (
     <>
     <div className="flex flex-col w-full flex-wrap items-center justify-between">
-      <div className="flex w-full items-center justify-center mb-4">
+      <div className="flex w-full items-center justify-center gap-2 mb-4">
         <Button onClick={() => onOpenAddModal()}>Post New Todo</Button>
+        <Button onClick={() => generateTodos()}>Generate todos</Button>
       </div>
      {data.todoayas.length ? data.todoayas.map((todo: ITodo) =>(
 
