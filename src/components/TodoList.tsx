@@ -10,6 +10,7 @@ import Textarea from "./ui/Textarea";
 import axiosinstance from "../config/axios config";
 import { editModelSchema } from "../validation";
 import InputErrorMessage from "./InputErrorMessage";
+import TodoSkeleton from "./TodoSkeleton";
 
 interface ITodo {
   id: number;
@@ -101,7 +102,14 @@ const onOpenEditModal = (todo:ITodo) => {
   function closeRemoveModal() {
     setIsRemoveOpen(false)
   }
-if(isLoading) return <p>Loading....</p>
+if(isLoading) return(
+  <div className="space-y-2">
+    {Array.from({length:3},(_,idx) => (
+      <TodoSkeleton key={idx}/>
+    ))
+    }
+  </div>
+)
 
 return (
     <>
