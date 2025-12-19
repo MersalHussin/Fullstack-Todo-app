@@ -13,20 +13,30 @@ import InputErrorMessage from "./InputErrorMessage";
 import TodoSkeleton from "./TodoSkeleton";
 
 interface ITodo {
-  id: number;
+  id?: number;
   documentId: string;
   title: string;
   description: string;
 }
+
 
 interface IEditFormInput {
   title: string;
   description?: string;
 }
 
+interface IAddFormInput {
+  title: string;
+  description?: string;
+}
+
 const TodoList = () => {
   const queryClient = useQueryClient();
-  const { register, handleSubmit, formState: { errors }, reset } = useForm<IEditFormInput>({
+  const { register: registerEdit, handleSubmit: handleSubmitEdit, formState: { errors: errorsEdit }, reset: resetEdit } = useForm<IEditFormInput>({
+    resolver: yupResolver(editModelSchema),
+    mode: "onSubmit"
+  });
+  const { register: registerAdd, handleSubmit: handleSubmitAdd, formState: { errors: errorsAdd }, reset: resetAdd } = useForm<IAddFormInput>({
     resolver: yupResolver(editModelSchema),
     mode: "onSubmit"
   });
@@ -34,6 +44,7 @@ const TodoList = () => {
 const [isUpdating , setIsUpdating] = useState(false)
 const [isRemoveOpen , setIsRemoveOpen] = useState(false)
 const [isEditModalOpen , setIsEditModalOpen] = useState(false)
+const [isAddModalOpen , setIsAddModalOpen] = useState(false)
 const [todoToEdit, setTodoToEdit] = useState<ITodo>();
 const storageKey = "loggedinUser";
 const userDataString =  localStorage.getItem(storageKey);
@@ -69,19 +80,47 @@ const  onSubmitHandler: SubmitHandler<IEditFormInput> = async (data) =>{
       setIsUpdating(false)
     }
 }
+const  onSubmitAddHandler: SubmitHandler<IAddFormInput> = async (data) =>{
+  setIsUpdating(true)
+    const{title, description} = data;
+    try {
+      await axiosinstance.post(`/todoayas`, {data: {title, description}},{
+        headers: {
+          Authorization: `Bearer ${userData.jwt}`
+        }
+      })
+      queryClient.invalidateQueries({ queryKey: ['todoayas'] });
+      onCloseAddModal();
+    } catch (error) {
+      console.log(error);
+    } finally{
+      setIsUpdating(false)
+    }
+}
 
+// Add Model
+const onCloseAddModal = () =>{
+  setIsAddModalOpen(false);
+  resetAdd();
+}
+const onOpenAddModal = () =>{
+  setIsAddModalOpen(true);
+  resetAdd();
+}
 
+// Edit Model
 const onCloseEditModal = () =>{
   setIsEditModalOpen(false);
-  reset();
+  resetEdit();
 }
 
 const onOpenEditModal = (todo:ITodo) => {
   setTodoToEdit(todo);
   setIsEditModalOpen(true);
-  reset({ title: todo.title, description: todo.description });
+  resetEdit({ title: todo.title, description: todo.description });
 }
 
+// Remove Modal
   const removeHandler = () =>{
     try {
       const res = axiosinstance.delete(`/todoayas/${todoToEdit?.documentId}`,{
@@ -95,7 +134,6 @@ const onOpenEditModal = (todo:ITodo) => {
       console.log(error);
     }
   }
-  
   const openRemoveModal = () => {
     setIsRemoveOpen(true)
   }
@@ -114,6 +152,9 @@ if(isLoading) return(
 return (
     <>
     <div className="flex flex-col w-full flex-wrap items-center justify-between">
+      <div className="flex w-full items-center justify-center mb-4">
+        <Button onClick={() => onOpenAddModal()}>Post New Todo</Button>
+      </div>
      {data.todoayas.length ? data.todoayas.map((todo: ITodo) =>(
 
        <div key={todo.id}  className="flex items-center justify-between w-full mb-4 p-4 border rounded-md">
@@ -127,14 +168,14 @@ return (
       )): <p>No Todos yet</p>}
 
       <Modal isOpen={isEditModalOpen} closeModal={onCloseEditModal} title="Edit this Todo"  >
-      <form onSubmit={handleSubmit(onSubmitHandler)} className="space-y-4">
+      <form onSubmit={handleSubmitEdit(onSubmitHandler)} className="space-y-4">
         <div>
-          <Input {...register("title")} placeholder="Title" />
-          {errors.title && <InputErrorMessage msg={errors.title.message} />}
+          <Input {...registerEdit("title")} placeholder="Title" />
+          {errorsEdit.title && <InputErrorMessage msg={errorsEdit.title.message} />}
         </div>
         <div>
-          <Textarea {...register("description")} placeholder="Description" className="w-full"/>
-          {errors.description && <InputErrorMessage msg={errors.description.message} />}
+          <Textarea {...registerEdit("description")} placeholder="Description" className="w-full"/>
+          {errorsEdit.description && <InputErrorMessage msg={errorsEdit.description.message} />}
         </div>
         <div className="flex gap-2 mt-4">
           <Button type="button" variant={"cancel"} onClick={onCloseEditModal} size={"sm"}>Cancel</Button>
@@ -157,6 +198,25 @@ return (
           <Button type="button" onClick={closeRemoveModal} className="flex-1 bg-gray-100 hover:bg-gray-200" style={{color:"black", backgroundColor:"gray"}}>Cancel</Button>
 </div>
       </Modal>
+ 
+      {/* Add Modal */}
+           <Modal isOpen={isAddModalOpen} closeModal={onCloseAddModal} title="Add New Todo"  >
+      <form onSubmit={handleSubmitAdd(onSubmitAddHandler)} className="space-y-4">
+        <div>
+          <Input {...registerAdd("title")} placeholder="Title" />
+          {errorsAdd.title && <InputErrorMessage msg={errorsAdd.title.message} />}
+        </div>
+        <div>
+          <Textarea {...registerAdd("description")} placeholder="Description" className="w-full"/>
+          {errorsAdd.description && <InputErrorMessage msg={errorsAdd.description.message} />}
+        </div>
+        <div className="flex gap-2 mt-4">
+          <Button type="button" variant={"cancel"} onClick={onCloseAddModal} size={"sm"}>Cancel</Button>
+          <Button type="submit"  size={"sm"} isLoading={isUpdating}>Add</Button>
+        </div>
+      </form>
+      </Modal>
+  
  
        
     </>
