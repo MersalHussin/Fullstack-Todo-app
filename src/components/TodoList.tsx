@@ -84,7 +84,7 @@ const  onSubmitAddHandler: SubmitHandler<IAddFormInput> = async (data) =>{
   setIsUpdating(true)
     const{title, description} = data;
     try {
-      await axiosinstance.post(`/todoayas`, {data: {title, description}},{
+      await axiosinstance.post(`/todoayas`, {data: {title, description,user:[userData.user.id]}},{
         headers: {
           Authorization: `Bearer ${userData.jwt}`
         }
@@ -121,24 +121,28 @@ const onOpenEditModal = (todo:ITodo) => {
 }
 
 // Remove Modal
-  const removeHandler = () =>{
+  const removeHandler = async () =>{
+    setIsUpdating(true);
     try {
-      const res = axiosinstance.delete(`/todoayas/${todoToEdit?.documentId}`,{
+      await axiosinstance.delete(`/todoayas/${todoToEdit?.documentId}`,{
         headers:{
           Authorization: `Bearer ${userData.jwt}`
         }
       })
-      console.log(res);
-      closeRemoveModal()
+      queryClient.invalidateQueries({ queryKey: ['todoayas'] });
+      closeRemoveModal();
     } catch (error) {
       console.log(error);
+    } finally {
+      setIsUpdating(false);
     }
   }
-  const openRemoveModal = () => {
-    setIsRemoveOpen(true)
+  const openRemoveModal = (todo: ITodo) => {
+    setTodoToEdit(todo);
+    setIsRemoveOpen(true);
   }
   function closeRemoveModal() {
-    setIsRemoveOpen(false)
+    setIsRemoveOpen(false);
   }
 if(isLoading) return(
   <div className="space-y-2">
@@ -163,7 +167,7 @@ return (
           <p className="text-sm text-gray-600">{todo.description}</p>
         </div>
         <Button onClick={() => onOpenEditModal(todo)} size={"sm"}>Edit</Button>
-        <Button onClick={()=> openRemoveModal()} variant={"danger"} size={"sm"}>Remove</Button>
+        <Button onClick={()=> openRemoveModal(todo)} variant={"danger"} size={"sm"}>Remove</Button>
     </div>
       )): <p>No Todos yet</p>}
 
@@ -189,12 +193,12 @@ return (
       {/* Delete Modal */}
         <Modal
         isOpen={isRemoveOpen}
-        closeModal={onCloseEditModal}
+        closeModal={closeRemoveModal}
         title="Are you Sure to remove this modal"
       >
           <p className="text-gray-500 text-md font-medium">Lorem ipsum dolor sit amet, consectetur adipisicing elit. Veritatis  eum unde corporis odit voluptatem repellendus minus incidunt laudantium! Quaerat.</p>
 <div className="flex gap-3 pt-1  ">
-            <Button className="flex-1 bg-red-600 " style={{background:"red"}} onClick={removeHandler}>Yes, Remove</Button>
+            <Button className="flex-1 bg-red-600 " style={{background:"red"}} onClick={removeHandler} isLoading={isUpdating}>Yes, Remove</Button>
           <Button type="button" onClick={closeRemoveModal} className="flex-1 bg-gray-100 hover:bg-gray-200" style={{color:"black", backgroundColor:"gray"}}>Cancel</Button>
 </div>
       </Modal>
