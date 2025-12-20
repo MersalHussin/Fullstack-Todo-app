@@ -1,16 +1,19 @@
 interface IPaginatorProps {
   page: number;
   totalPages: number;
-  onPageChange: (page: number) => void;
+  onPrevious: () => void;
+  onNext: () => void;
+  isFirstPage: boolean;
+  isLastPage: boolean;
 }
 
-const Paginator = ({ page, totalPages, onPageChange }: IPaginatorProps) => {
+const Paginator = ({ page, totalPages, onPrevious, onNext, isFirstPage, isLastPage }: IPaginatorProps) => {
   return (
     <div className="flex items-center justify-center gap-2 mt-6">
       <button 
         className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-        onClick={() => onPageChange(page - 1)} 
-        disabled={page === 1}
+        onClick={onPrevious} 
+        disabled={isFirstPage}
       >
         Previous
       </button>
@@ -21,8 +24,8 @@ const Paginator = ({ page, totalPages, onPageChange }: IPaginatorProps) => {
       
       <button 
         className="px-4 py-2 text-sm font-medium text-white bg-indigo-600 rounded-md hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-        onClick={() => onPageChange(page + 1)} 
-        disabled={page === totalPages}
+        onClick={onNext} 
+        disabled={isLastPage}
       >
         Next
       </button>

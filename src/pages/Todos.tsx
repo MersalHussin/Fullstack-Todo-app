@@ -42,7 +42,7 @@ if(isLoading) return(
        
     </div>
       )): <p>No Todos yet</p>}
-      <Paginator/>
+      <Paginator />
     </>
   );
 };
