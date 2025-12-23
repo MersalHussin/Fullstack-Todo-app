@@ -185,7 +185,7 @@ return (
 
        <div key={todo.id}  className="flex items-center justify-between w-full mb-4 p-4 border rounded-md">
         <div className="w-full">
-          <p className="font-semibold">{todo.title}</p>
+          <p className="font-semibold"> {todo.id}- {todo.title}</p>
           <p className="text-sm text-gray-600">{todo.description}</p>
         </div>
         <Button onClick={() => onOpenEditModal(todo)} size={"sm"}>Edit</Button>

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import Paginator from "../components/Paginator";
 import TodoSkeleton from "../components/TodoSkeleton";
 import UseAuthenticatedQuery from "../hooks/useAuthenticatedQuery";
@@ -10,12 +11,13 @@ interface ITodo {
 
   // Handlers
   const storageKey = "loggedinUser";
-const userDataString =  localStorage.getItem(storageKey);
-const userData = userDataString ? JSON.parse(userDataString) : null;
+  const userDataString =  localStorage.getItem(storageKey);
+  const userData = userDataString ? JSON.parse(userDataString) : null;
   const TodosPage=()=>{
-const {isLoading, data} = UseAuthenticatedQuery({
+    const [page, setPage] = useState(1);
+  const {isLoading, data} = UseAuthenticatedQuery({
   url:"/todoayas",
-  querykey:['paginationTodos'],
+  querykey:['paginationTodos' ,`page=${page}`],
   config: {
     headers: {
       Authorization: `Bearer ${userData.jwt}`
@@ -31,6 +33,22 @@ if(isLoading) return(
     }
   </div>
 )
+
+
+// Handlers:
+  const onClickNext = () => {
+    console.log("Next Page clicked");
+    setPage(prev => prev + 1);
+    console.log(page);
+  }
+  const onClickPrevious = () => {
+    console.log("Previous Page clicked");
+    setPage(prev => prev - 1);
+    console.log(page);
+  }
+
+
+
   return (
     <>
      {data.data.length ? data.data.map((todo: ITodo) =>(
@@ -42,7 +60,7 @@ if(isLoading) return(
        
     </div>
       )): <p>No Todos yet</p>}
-      <Paginator />
+      <Paginator page={page} pageCount={5}  onClickNext={onClickNext}  onClickPrevious={onClickPrevious}/>
     </>
   );
 };
