@@ -14,10 +14,12 @@ interface ITodo {
   const userDataString =  localStorage.getItem(storageKey);
   const userData = userDataString ? JSON.parse(userDataString) : null;
   const TodosPage=()=>{
-    const [page, setPage] = useState(1);
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(12);
+  const [sortBy, setSortBy] = useState("DESC");
   const {isLoading, data ,isFetching} = UseAuthenticatedQuery({
-  url:`/todoayas?pagination[pageSize]=15&pagination[page]=${page}`,
-  querykey:[`todos-page-${page}`],
+  url:`/todoayas?pagination[pageSize]=${pageSize}&pagination[page]=${page}&sort=createdAt:${sortBy}`,
+  querykey:[`todos-page-${page}` , `pageSize-${pageSize}` , `sortBy-${sortBy}`],
   config: {
     headers: {
       Authorization: `Bearer ${userData.jwt}`
@@ -48,12 +50,28 @@ console.log(data);
     console.log(page);
   }
 
+  const onChangePageSize = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setPageSize(Number(e.target.value));
+  }
+  const onChangeSortBy = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setSortBy(e.target.value);
+  }
 
 
   return (
     <>
+      <select name="Sort by" id="12" className="border p-2 rounded-md mb-4" value={sortBy} onChange={onChangeSortBy}>
+        <option value="ASC">Oldest</option>
+        <option value="DESC">Latest</option>
+      </select>
+      <select name="Page Size" id="12" className="border p-2 rounded-md mb-4" value={pageSize} onChange={onChangePageSize}>
+        <option disabled value="">Page Size</option>
+        <option value="10">10</option>
+        <option value="15">15</option>
+        <option value="20">20</option>
+        <option value="40">40</option>
+      </select>
      {data.data.length ? data.data.map((todo: ITodo) =>(
-
        <div key={todo.id}  className="flex items-center justify-between w-full mb-4 p-4 border rounded-md">
         <div className="w-full">
           <h3 className="font-semibold"> {todo.id}- {todo.title}</h3>
