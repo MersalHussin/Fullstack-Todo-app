@@ -15,9 +15,9 @@ interface ITodo {
   const userData = userDataString ? JSON.parse(userDataString) : null;
   const TodosPage=()=>{
     const [page, setPage] = useState(1);
-  const {isLoading, data} = UseAuthenticatedQuery({
-  url:"/todoayas",
-  querykey:['paginationTodos' ,`page=${page}`],
+  const {isLoading, data ,isFetching} = UseAuthenticatedQuery({
+  url:`/todoayas?pagination[pageSize]=15&pagination[page]=${page}`,
+  querykey:[`todos-page-${page}`],
   config: {
     headers: {
       Authorization: `Bearer ${userData.jwt}`
@@ -34,6 +34,7 @@ if(isLoading) return(
   </div>
 )
 
+console.log(data);
 
 // Handlers:
   const onClickNext = () => {
@@ -60,7 +61,7 @@ if(isLoading) return(
        
     </div>
       )): <p>No Todos yet</p>}
-      <Paginator page={page} pageCount={5}  onClickNext={onClickNext}  onClickPrevious={onClickPrevious}/>
+      <Paginator page={page} pageCount={data.meta.pagination.pageCount} records={data.meta.pagination.total} onClickNext={onClickNext} isLoading= {isLoading || isFetching} onClickPrevious={onClickPrevious}/>
     </>
   );
 };

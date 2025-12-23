@@ -1,10 +1,12 @@
 interface IProps {
   page: number;
   pageCount: number;
+  records: number;
+  isLoading: boolean;
   onClickNext?: () => void;
   onClickPrevious?: () => void;
 }
-const Paginator = ({page = 1,pageCount = 10,onClickNext,onClickPrevious}:IProps) => {
+const Paginator = ({page = 1,records,pageCount = 10,onClickNext,onClickPrevious}:IProps) => {
   return (
     <div className="flex items-center justify-center gap-2 mt-6">
       <button 
@@ -15,7 +17,7 @@ const Paginator = ({page = 1,pageCount = 10,onClickNext,onClickPrevious}:IProps)
       </button>
       
       <span className="px-4 py-2 text-sm font-medium text-gray-700">
-        Page 1 of 10
+        Page {page} to {pageCount} of {records} Records 
       </span>
       
       <button 
